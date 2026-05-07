@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The City We Live In — Lisboa</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+:root {
+  --pink: #F472B6;
+  --blue: #38BFFF;
+  --yellow: #FFD700;
+  --coral: #FF6B6B;
+  --teal: #2DD4BF;
+  --green: #4ADE80;
+  --cream: #FFF8F0;
+  --ink: #1E1B18;
+  --lilac: #C4B5FD;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Nunito', sans-serif;
+  overflow-x: hidden;
+}
+
+/* wavy background dots */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(244,114,182,.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* LANG BAR */
+.lang-bar {
+  background: var(--ink);
+  padding: .5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 10;
+}
+.lang-logo {
+  font-family: 'Fredoka One', cursive;
+  color: var(--yellow);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+.dot-blink {
+  width: 9px; height: 9px;
+  background: var(--coral);
+  border-radius: 50%;
+  animation: blink 1.5s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.lang-pills { display: flex; gap: .3rem; }
+.lp {
+  background: transparent;
+  border: 1.5px solid rgba(255,255,255,.2);
+  color: rgba(255,255,255,.55);
+  padding: .2rem .55rem;
+  border-radius: 100px;
+  font-size: .72rem;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+}
+.lp:hover { border-color: var(--yellow); color: var(--yellow); }
+.lp.active { background: var(--yellow); color: var(--ink); border-color: var(--yellow); }
+
+/* NAV */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 3rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--cream);
+  border-bottom: 3px solid var(--ink);
+}
+.nav-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.5rem;
+  color: var(--ink);
+  letter-spacing: .02em;
+}
+.nav-title span { color: var(--coral); }
+nav ul { list-style: none; display: flex; gap: 1.5rem; align-items: center; }
+nav a { text-decoration: none; color: var(--ink); font-size: .9rem; font-weight: 700; transition: color .2s; }
+nav a:hover { color: var(--pink); }
+.nav-cta {
+  background: var(--coral);
+  color: #fff !important;
+  padding: .45rem 1.2rem;
+  border-radius: 100px;
+  border: 2.5px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: transform .15s, box-shadow .15s !important;
+}
+.nav-cta:hover { transform: translate(-2px,-2px) !important; box-shadow: 5px 5px 0 var(--ink) !important; color:#fff !important; }
+
+/* HERO */
+.hero {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 3rem 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+.hero-eyebrow {
+  display: inline-block;
+  background: var(--yellow);
+  color: var(--ink);
+  font-weight: 800;
+  font-size: .75rem;
+  padding: .3rem 1rem;
+  border-radius: 100px;
+  border: 2.5px solid var(--ink);
+  margin-bottom: 1.2rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.hero h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(2.8rem, 5vw, 4.2rem);
+  line-height: 1.1;
+  margin-bottom: 1.2rem;
+  color: var(--ink);
+}
+.hero h1 .hl-pink { color: var(--pink); }
+.hero h1 .hl-blue { color: var(--blue); }
+.hero h1 .hl-coral { color: var(--coral); }
+.hero-desc {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: #4A3F38;
+  margin-bottom: 2rem;
+  font-weight: 600;
+}
+.hero-desc em { color: var(--coral); font-style: normal; font-weight: 800; }
+.hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+.btn-main {
+  background: var(--blue);
+  color: var(--ink);
+  border: 2.5px solid var(--ink);
+  padding: .8rem 1.8rem;
+  border-radius: 100px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: transform .15s, box-shadow .15s;
+}
+.btn-main:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--ink); }
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 2.5px solid var(--ink);
+  padding: .8rem 1.8rem;
+  border-radius: 100px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: transform .15s, box-shadow .15s, background .15s;
+}
+.btn-ghost:hover { background: var(--lilac); transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--ink); }
+
+/* HERO ILLUSTRATION */
+.hero-illustration {
+  position: relative;
+  height: 460px;
+}
+.hero-card {
+  background: white;
+  border: 3px solid var(--ink);
+  border-radius: 28px;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: visible;
+  box-shadow: 8px 8px 0 var(--ink);
+}
+#hero-map {
+  width: 100%;
+  height: 100%;
+  border-radius: 25px;
+  z-index: 1;
+}
+#map-search-bar {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 2.5px solid var(--ink);
+  border-radius: 100px;
+  padding: 7px 16px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+#map-search {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  background: transparent;
+  color: var(--ink);
+}
+#map-search::placeholder { color: #9B8E88; }
+.leaflet-popup-content-wrapper {
+  border: 2.5px solid var(--ink) !important;
+  border-radius: 16px !important;
+  box-shadow: 4px 4px 0 var(--ink) !important;
+  padding: 0 !important;
+}
+.leaflet-popup-content { margin: 14px 16px !important; }
+.leaflet-popup-tip-container { display: none; }
+
+.map-overlay-pin {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  animation: float 3s ease-in-out infinite;
+  z-index: 5;
+}
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+.map-overlay-pin:nth-child(2) { animation-delay: .5s; }
+.map-overlay-pin:nth-child(3) { animation-delay: 1s; }
+.map-overlay-pin:nth-child(4) { animation-delay: 1.5s; }
+
+.pin-bubble {
+  width: 42px; height: 42px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 2.5px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 3px 3px 0 var(--ink);
+  font-size: 18px;
+}
+.pin-bubble span { transform: rotate(45deg); line-height: 1; }
+.pin-label-pop {
+  margin-top: 5px;
+  background: white;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  padding: 3px 9px;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 2px 2px 0 var(--ink);
+  font-family: 'Nunito', sans-serif;
+}
+
+/* floating hearts/stars deco */
+.deco {
+  position: absolute;
+  font-size: 1.4rem;
+  animation: spin-float 4s ease-in-out infinite;
+  z-index: 6;
+  pointer-events: none;
+}
+@keyframes spin-float { 0%,100%{transform:rotate(0deg) translateY(0)} 50%{transform:rotate(15deg) translateY(-8px)} }
+
+/* STATS STRIP */
+.stats-strip {
+  background: var(--ink);
+  padding: 1.2rem 3rem;
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+.stat-item { text-align: center; }
+.stat-num {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2.2rem;
+  color: var(--yellow);
+  display: block;
+  line-height: 1;
+}
+.stat-label { font-size: .75rem; color: rgba(255,255,255,.6); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+
+/* WHAT DOES LISBON MEAN */
+.question-section {
+  background: var(--pink);
+  border-top: 3px solid var(--ink);
+  border-bottom: 3px solid var(--ink);
+  padding: 3.5rem 3rem;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+.question-section::after {
+  content: '♥ ♪ ★ ♥ ♪ ★ ♥ ♪ ★ ♥ ♪ ★';
+  position: absolute;
+  bottom: .8rem;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: .85rem;
+  color: rgba(255,255,255,.4);
+  letter-spacing: .5em;
+}
+.question-inner { max-width: 800px; margin: 0 auto; text-align: center; }
+.question-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  color: white;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+  text-shadow: 3px 3px 0 var(--ink);
+}
+.question-title span { color: var(--yellow); }
+.question-sub {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,.9);
+  font-weight: 700;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+.question-sub strong { color: var(--yellow); }
+
+/* HOW IT WORKS */
+.how-section { max-width: 1200px; margin: 0 auto; padding: 5rem 3rem; position: relative; z-index: 1; }
+.section-eyebrow {
+  font-family: 'Fredoka One', cursive;
+  font-size: .9rem;
+  color: var(--blue);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  margin-bottom: .6rem;
+  display: block;
+}
+.section-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  margin-bottom: 3rem;
+  line-height: 1.2;
+}
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.5rem; }
+.step-card {
+  background: white;
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  padding: 1.8rem 1.5rem;
+  box-shadow: 5px 5px 0 var(--ink);
+  transition: transform .2s, box-shadow .2s;
+  position: relative;
+  overflow: hidden;
+}
+.step-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  border-radius: 24px 24px 0 0;
+}
+.step-card:nth-child(1)::before { background: var(--coral); }
+.step-card:nth-child(2)::before { background: var(--blue); }
+.step-card:nth-child(3)::before { background: var(--teal); }
+.step-card:nth-child(4)::before { background: var(--pink); }
+.step-card:hover { transform: translate(-3px,-3px); box-shadow: 8px 8px 0 var(--ink); }
+.step-emoji { font-size: 2.2rem; display: block; margin-bottom: .6rem; }
+.step-num {
+  font-family: 'Fredoka One', cursive;
+  font-size: 3rem;
+  line-height: 1;
+  margin-bottom: .4rem;
+}
+.step-card:nth-child(1) .step-num { color: var(--coral); }
+.step-card:nth-child(2) .step-num { color: var(--blue); }
+.step-card:nth-child(3) .step-num { color: var(--teal); }
+.step-card:nth-child(4) .step-num { color: var(--pink); }
+.step-title { font-weight: 800; font-size: 1.05rem; margin-bottom: .4rem; }
+.step-desc { font-size: .88rem; line-height: 1.65; color: #5A4F48; font-weight: 600; }
+
+/* STORIES */
+.stories-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 5rem 3rem;
+  position: relative; z-index: 1;
+}
+.stories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+.story-card {
+  background: white;
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  padding: 1.4rem;
+  box-shadow: 5px 5px 0 var(--ink);
+  transition: transform .2s, box-shadow .2s;
+}
+.story-card:hover { transform: translate(-3px,-3px); box-shadow: 8px 8px 0 var(--ink); }
+.story-top { display: flex; align-items: center; gap: .7rem; margin-bottom: .8rem; }
+.story-avatar {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  border: 2.5px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+.story-nick { font-weight: 800; font-size: .9rem; }
+.story-from { font-size: .75rem; color: #7A6E68; font-weight: 600; }
+.story-place {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--yellow);
+  border: 2px solid var(--ink);
+  border-radius: 100px;
+  padding: 2px 10px;
+  font-size: .72rem;
+  font-weight: 800;
+  margin-bottom: .7rem;
+}
+.story-quote {
+  font-size: .9rem;
+  line-height: 1.65;
+  color: var(--ink);
+  font-weight: 600;
+  font-style: italic;
+}
+.story-word {
+  display: inline-block;
+  margin-top: .8rem;
+  background: var(--coral);
+  color: white;
+  border: 2px solid var(--ink);
+  border-radius: 100px;
+  padding: .2rem .8rem;
+  font-family: 'Fredoka One', cursive;
+  font-size: .9rem;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.story-player {
+  margin-top: .8rem;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  padding: .5rem .8rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  cursor: pointer;
+}
+.play-circle {
+  width: 28px; height: 28px;
+  background: var(--coral);
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 10px;
+  color: white;
+}
+.play-bar { flex: 1; height: 4px; background: #ddd; border-radius: 2px; overflow: hidden; }
+.play-fill { height: 100%; background: var(--coral); border-radius: 2px; }
+.play-time { font-size: 11px; color: #888; font-weight: 700; }
+
+/* CTA */
+.cta-section {
+  background: var(--ink);
+  padding: 5rem 3rem;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+.cta-section::before {
+  content: '★ ♥ ★ ♥ ★ ♥ ★ ♥ ★ ♥ ★ ♥ ★';
+  position: absolute;
+  top: 1rem;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: .85rem;
+  color: rgba(255,255,255,.12);
+  letter-spacing: .6em;
+}
+.cta-inner { max-width: 640px; margin: 0 auto; }
+.cta-section h2 {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: white;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+.cta-section h2 span { color: var(--yellow); }
+.cta-section p { color: rgba(255,255,255,.7); font-size: 1.05rem; line-height: 1.7; font-weight: 600; margin-bottom: 2rem; }
+.cta-section p strong { color: var(--pink); font-weight: 800; }
+.cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.btn-yellow {
+  background: var(--yellow);
+  color: var(--ink);
+  border: 2.5px solid white;
+  padding: .85rem 2rem;
+  border-radius: 100px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  box-shadow: 4px 4px 0 white;
+  transition: transform .15s, box-shadow .15s;
+}
+.btn-yellow:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 white; }
+.btn-white-ghost {
+  background: transparent;
+  color: white;
+  border: 2.5px solid rgba(255,255,255,.4);
+  padding: .85rem 2rem;
+  border-radius: 100px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: border-color .2s, background .2s;
+}
+.btn-white-ghost:hover { border-color: white; background: rgba(255,255,255,.08); }
+
+/* FOOTER */
+footer {
+  background: var(--cream);
+  border-top: 3px solid var(--ink);
+  padding: 2rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  position: relative; z-index: 1;
+}
+.foot-logo { font-family: 'Fredoka One', cursive; font-size: 1.1rem; }
+footer p { font-size: .82rem; color: #7A6E68; font-weight: 600; }
+.foot-links { display: flex; gap: 1.5rem; }
+.foot-links a { font-size: .82rem; color: var(--ink); text-decoration: none; font-weight: 700; }
+.foot-links a:hover { color: var(--pink); }
+
+/* QUOTE STRIP */
+.quote-strip {
+  background: var(--teal);
+  border-top: 3px solid var(--ink);
+  border-bottom: 3px solid var(--ink);
+  padding: 2.5rem 3rem;
+  text-align: center;
+  position: relative; z-index: 1;
+}
+.quote-strip blockquote {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+  color: white;
+  text-shadow: 2px 2px 0 rgba(0,0,0,.2);
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.4;
+}
+.quote-strip blockquote em { color: var(--yellow); font-style: normal; }
+
+/* RESPONSIVE */
+@media(max-width: 768px) {
+  nav { padding: 1rem 1.5rem; }
+  nav ul { display: none; }
+  .hero { grid-template-columns: 1fr; padding: 2.5rem 1.5rem; gap: 2rem; }
+  .hero-illustration { height: 280px; }
+  .how-section, .stories-section { padding: 3rem 1.5rem; }
+  .pins-section, .question-section, .cta-section { padding: 3rem 1.5rem; }
+  footer { padding: 1.5rem; flex-direction: column; align-items: flex-start; }
+  .stats-strip { gap: 2rem; padding: 1.2rem 1.5rem; }
+}
+
+/* Entrance animations */
+@keyframes slideUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+.hero-left > * { animation: slideUp .6s ease both; }
+.hero-left > *:nth-child(1){animation-delay:.1s}
+.hero-left > *:nth-child(2){animation-delay:.2s}
+.hero-left > *:nth-child(3){animation-delay:.3s}
+.hero-left > *:nth-child(4){animation-delay:.4s}
+.hero-illustration { animation: slideUp .7s .25s ease both; }
+</style>
+</head>
+<body>
+
+<!-- LANG BAR -->
+<div class="lang-bar">
+  <div class="lang-logo"><div class="dot-blink"></div> The City We Live In</div>
+  <div class="lang-pills">
+    <button class="lp active" onclick="setLang('pt')">🇵🇹 PT</button>
+    <button class="lp" onclick="setLang('en')">🇬🇧 EN</button>
+    <button class="lp" onclick="setLang('it')">🇮🇹 IT</button>
+    <button class="lp" onclick="setLang('fr')">🇫🇷 FR</button>
+    <button class="lp" onclick="setLang('es')">🇪🇸 ES</button>
+    <button class="lp" onclick="setLang('de')">🇩🇪 DE</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-title">The City <span>We Live In</span></div>
+  <ul>
+    <li><a href="#how" data-i18n="nav_how"></a></li>
+    <li><a href="#stories" data-i18n="nav_stories"></a></li>
+    <li><a href="#share" class="nav-cta" data-i18n="nav_share"></a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <span class="hero-eyebrow" data-i18n="hero_tag"></span>
+    <h1 data-i18n="hero_h1"></h1>
+    <p class="hero-desc" data-i18n="hero_desc"></p>
+    <div class="hero-btns">
+      <a href="#how" class="btn-main" data-i18n="hero_btn1"></a>
+      <a href="#share" class="btn-ghost" data-i18n="hero_btn2"></a>
+    </div>
+  </div>
+
+  <div class="hero-illustration">
+    <div class="hero-card">
+      <div id="map-search-bar">
+        <span>🔍</span>
+        <input id="map-search" type="text" placeholder="Pesquisa um lugar em Lisboa..." />
+      </div>
+      <div id="hero-map"></div>
+    </div>
+    <!-- floating deco elements -->
+    <div class="deco" style="top:-12px;right:20px;animation-delay:.3s">⭐</div>
+    <div class="deco" style="top:40px;right:-15px;animation-delay:1.2s">💗</div>
+    <div class="deco" style="bottom:30px;right:-18px;animation-delay:.7s">♪</div>
+    <div class="deco" style="bottom:-10px;left:30px;animation-delay:1.8s">🌟</div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stat-item"><span class="stat-num">34</span><span class="stat-label" data-i18n="stat1"></span></div>
+  <div class="stat-item"><span class="stat-num">18</span><span class="stat-label" data-i18n="stat2"></span></div>
+  <div class="stat-item"><span class="stat-num">12</span><span class="stat-label" data-i18n="stat3"></span></div>
+  <div class="stat-item"><span class="stat-num">0</span><span class="stat-label" data-i18n="stat4"></span></div>
+</div>
+
+<!-- QUESTION SECTION -->
+<div class="question-section" id="question">
+  <div class="question-inner">
+    <h2 class="question-title" data-i18n="q_title"></h2>
+    <p class="question-sub" data-i18n="q_sub"></p>
+    <a href="#share" class="btn-main" style="background:white;color:var(--ink)" data-i18n="q_btn"></a>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <span class="section-eyebrow" data-i18n="how_tag"></span>
+  <h2 class="section-title" data-i18n="how_title"></h2>
+  <div class="steps">
+    <div class="step-card">
+      <span class="step-emoji">🗺️</span>
+      <div class="step-num">01</div>
+      <div class="step-title" data-i18n="step1_title"></div>
+      <p class="step-desc" data-i18n="step1_desc"></p>
+    </div>
+    <div class="step-card">
+      <span class="step-emoji">💬</span>
+      <div class="step-num">02</div>
+      <div class="step-title" data-i18n="step2_title"></div>
+      <p class="step-desc" data-i18n="step2_desc"></p>
+    </div>
+    <div class="step-card">
+      <span class="step-emoji">✨</span>
+      <div class="step-num">03</div>
+      <div class="step-title" data-i18n="step3_title"></div>
+      <p class="step-desc" data-i18n="step3_desc"></p>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE STRIP -->
+<div class="quote-strip">
+  <blockquote data-i18n="quote_text"></blockquote>
+</div>
+
+<!-- STORIES -->
+<section class="stories-section" id="stories">
+  <span class="section-eyebrow" data-i18n="stories_tag"></span>
+  <h2 class="section-title" data-i18n="stories_title"></h2>
+  <div class="stories-grid">
+    <div class="story-card">
+      <div class="story-top">
+        <div class="story-avatar" style="background:#FAD5C8">🌸</div>
+        <div><div class="story-nick">sol_dakar</div><div class="story-from" data-i18n="v1_origin"></div></div>
+      </div>
+      <div class="story-place">📍 Mercado Campo de Ourique</div>
+      <p class="story-quote" data-i18n="v1_quote"></p>
+      <div class="story-word" data-i18n="v1_word"></div>
+    </div>
+    <div class="story-card">
+      <div class="story-top">
+        <div class="story-avatar" style="background:#C4EAE3">🎸</div>
+        <div><div class="story-nick">metro_ghost</div><div class="story-from" data-i18n="v2_origin"></div></div>
+      </div>
+      <div class="story-place">📍 Paragem Intendente</div>
+      <p class="story-quote" data-i18n="v2_quote"></p>
+      <div class="story-word" data-i18n="v2_word"></div>
+    </div>
+    <div class="story-card">
+      <div class="story-top">
+        <div class="story-avatar" style="background:#E8DFFA">🌙</div>
+        <div><div class="story-nick">jardim_estrela</div><div class="story-from" data-i18n="v3_origin"></div></div>
+      </div>
+      <div class="story-place">📍 Jardim da Estrela</div>
+      <p class="story-quote" data-i18n="v3_quote"></p>
+      <div class="story-word" data-i18n="v3_word"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section" id="share">
+  <div class="cta-inner">
+    <h2 data-i18n="cta_title"></h2>
+    <p data-i18n="cta_desc"></p>
+    <div class="cta-btns">
+      <a href="mailto:hello@thecitywelive.in" class="btn-yellow" data-i18n="cta_btn1"></a>
+      <a href="#how" class="btn-white-ghost" data-i18n="cta_btn2"></a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-logo">🗺️ The City We Live In</div>
+  <p data-i18n="footer_sub"></p>
+  <div class="foot-links">
+    <a href="#" data-i18n="foot_about"></a>
+    <a href="#" data-i18n="foot_contact"></a>
+    <a href="#">Instagram</a>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ── INTERACTIVE MAP ──────────────────────────────────────────
+const lisbonMap = L.map('hero-map', { zoomControl: false })
+  .setView([38.7169, -9.1399], 13);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  maxZoom: 19
+}).addTo(lisbonMap);
+
+L.control.zoom({ position: 'bottomright' }).addTo(lisbonMap);
+
+const spots = [
+  { lat: 38.7161, lng: -9.1506, place: "Mercado Campo de Ourique", avatar: "🌸", nick: "sol_dakar", originKey: "v1_origin", quoteKey: "v1_quote", wordKey: "v1_word", color: "#FF6B6B" },
+  { lat: 38.7218, lng: -9.1333, place: "Paragem Intendente",       avatar: "🎸", nick: "metro_ghost",    originKey: "v2_origin", quoteKey: "v2_quote", wordKey: "v2_word", color: "#38BFFF" },
+  { lat: 38.7143, lng: -9.1572, place: "Jardim da Estrela",        avatar: "🌙", nick: "jardim_estrela", originKey: "v3_origin", quoteKey: "v3_quote", wordKey: "v3_word", color: "#C4B5FD" },
+  { lat: 38.7139, lng: -9.1311, place: "Miradouro de Santa Luzia", avatar: "☀️", nick: "alfama.sun",     originKey: "v4_origin", quoteKey: "v4_quote", wordKey: "v4_word", color: "#4ADE80" },
+  { lat: 38.7080, lng: -9.1455, place: "Bairro Alto",              avatar: "🎵", nick: "fado.noite",     originKey: "v5_origin", quoteKey: "v5_quote", wordKey: "v5_word", color: "#FFD700" }
+];
+
+function makePin(color, avatar) {
+  return L.divIcon({
+    className: '',
+    html: `<div style="width:38px;height:38px;background:${color};border:2.5px solid #1E1B18;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:3px 3px 0 #1E1B18;display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="transform:rotate(45deg);font-size:15px;line-height:1;">${avatar}</span></div>`,
+    iconSize: [38, 38], iconAnchor: [10, 38], popupAnchor: [9, -40]
+  });
+}
+
+function buildPopup(spot, t) {
+  return `<div style="font-family:'Nunito',sans-serif;min-width:210px;">
+    <div style="font-size:11px;font-weight:800;color:#1E1B18;margin-bottom:7px;letter-spacing:.03em;">📍 ${spot.place}</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <div style="width:34px;height:34px;border-radius:50%;border:2px solid #1E1B18;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:#FFF8F0;flex-shrink:0;">${spot.avatar}</div>
+      <div>
+        <div style="font-weight:800;font-size:13px;color:#1E1B18;">${spot.nick}</div>
+        <div style="font-size:11px;color:#7A6E68;font-weight:600;">${t[spot.originKey] || ''}</div>
+      </div>
+    </div>
+    <p style="font-style:italic;font-size:12px;line-height:1.6;color:#1E1B18;margin:0 0 8px;">${t[spot.quoteKey] || ''}</p>
+    <span style="background:${spot.color};color:#1E1B18;padding:2px 10px;border-radius:100px;font-size:11px;font-weight:800;border:2px solid #1E1B18;display:inline-block;">${t[spot.wordKey] || ''}</span>
+  </div>`;
+}
+
+const markers = spots.map(spot => {
+  const m = L.marker([spot.lat, spot.lng], { icon: makePin(spot.color, spot.avatar) }).addTo(lisbonMap);
+  m._spotData = spot;
+  return m;
+});
+
+document.getElementById('map-search').addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter') return;
+  const q = this.value.trim();
+  if (!q) return;
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q + ' Lisboa Portugal')}&limit=1&countrycodes=pt`)
+    .then(r => r.json())
+    .then(d => { if (d.length) lisbonMap.setView([+d[0].lat, +d[0].lon], 16); });
+});
+
+// ── i18n ─────────────────────────────────────────────────────
+const T = {
+pt:{nav_how:"Como funciona",nav_stories:"Histórias",nav_share:"Partilha a tua",hero_tag:"🗺 Lisboa · Vozes Reais",hero_h1:'<span class="hl-pink">A cidade</span><br>que <span class="hl-blue">habitamos</span><br><span class="hl-coral">juntos</span>',hero_desc:'Uma cidade não é só ruas e edifícios. É <em>rotinas partilhadas, vidas e memórias.</em> Não importa de onde vieste — partilhamos os mesmos cantos.',hero_btn1:"Como funciona",hero_btn2:"Conta a tua história",stat1:"Histórias partilhadas",stat2:"Lugares em Lisboa",stat3:"Partes do mundo",stat4:"Dados pessoais pedidos",q_title:'O que significa <span>Lisboa</span> para ti?',q_sub:'Pega num cartão e num pin colorido. Escreve uma palavra. Coloca-o no teu lugar favorito em Lisboa. <strong>É assim que a cidade se escreve — por todos os que a chamam de casa.</strong>',q_btn:"Escreve a tua palavra",how_tag:"Como funciona",how_title:"Explora. Sente. Partilha.",step1_title:"Navega o mapa",step1_desc:"Percorre o mapa de Lisboa e descobre os lugares marcados pela comunidade.",step2_title:"Clica num sítio",step2_desc:"Lê os insights, pensamentos e emoções que as pessoas deixaram — o que a cidade significa para elas.",step3_title:"Partilha o teu",step3_desc:"Adiciona a tua perspetiva. Uma palavra, uma emoção, uma memória. Sem conta, sem dados.",pins_title:"Cada cor é um mundo",pins_sub:"A cor do teu pin representa de onde vieste — juntos formam o mapa do mundo em Lisboa.",pin1:"Europa",pin2:"Ásia",pin3:"África",pin4:"América",pin5:"Oceânia",pin6:"Médio Oriente",quote_text:'"Não é todos os dias que conseguimos ver os fios invisíveis que nos ligam. <em>Esta cidade é escrita por todos os que a chamam de casa.</em>"',stories_tag:"Histórias reais",stories_title:"O que Lisboa significa para eles.",v1_origin:"De Dacar · 3 anos em Lisboa",v1_quote:'"Toda a terça venho aqui comprar especiarias. O cheiro é quase igual ao de Dakar. Quase."',v1_word:"Cheiro",v2_origin:"De Nápoles · 1 ano em Lisboa",v2_quote:'"Esperei este autocarro 40 vezes antes de perceber que o atraso faz parte do ritmo da cidade."',v2_word:"Ritmo",v3_origin:"De Casablanca · 5 anos em Lisboa",v3_quote:'"A minha filha aprendeu a andar neste jardim. Quando volto aqui sozinha, ainda ouço os seus passinhos."',v3_word:"Raízes",map_search_ph:"Pesquisa um lugar em Lisboa...",v4_origin:"Do Brasil · 2 anos em Lisboa",v4_quote:'"Vim aqui no meu primeiro dia. Olhei para o Tejo e percebi que ia ficar."',v4_word:"Chegada",v5_origin:"De Angola · 4 anos em Lisboa",v5_quote:'"O fado daqui não é para turistas. É alguém que está a chorar com a boca fechada."',v5_word:"Saudade",cta_title:'Tens uma história ligada a <span>Lisboa?</span>',cta_desc:'Pega num pin. Escreve uma palavra. Coloca-a no teu sítio. <strong>Não precisas de conta, nem de dados, nem de app.</strong> Só a tua voz e um lugar.',cta_btn1:"Quero participar",cta_btn2:"Saber mais",footer_sub:"Um projecto de vozes e memórias · Lisboa, Portugal",foot_about:"Sobre",foot_contact:"Contacto"},
+
+en:{nav_how:"How it works",nav_stories:"Stories",nav_share:"Share yours",hero_tag:"🗺 Lisbon · Real Voices",hero_h1:'<span class="hl-pink">The city</span><br>we <span class="hl-blue">live</span><br><span class="hl-coral">in</span>',hero_desc:'A city is not just streets and buildings. It\'s <em>shared routines, lives, and memories.</em> No matter where you came from — we all share the same corners.',hero_btn1:"How it works",hero_btn2:"Share your story",stat1:"Stories shared",stat2:"Spots in Lisbon",stat3:"Parts of the world",stat4:"Personal data asked",q_title:'What does <span>Lisbon</span> mean to you?',q_sub:'Take a card and a coloured pin. Write one word. Place it on your favourite spot in Lisbon. <strong>This is how a city gets written — by everyone who calls it home.</strong>',q_btn:"Write your word",how_tag:"How it works",how_title:"Explore. Feel. Share.",step1_title:"Navigate the map",step1_desc:"Browse the Lisbon map and discover spots marked by the community.",step2_title:"Click on a spot",step2_desc:"Read the insights, thoughts and emotions people have left — what the city means to them.",step3_title:"Share yours",step3_desc:"Add your own perspective. A word, an emotion, a memory. No account, no data needed.",pins_title:"Every colour is a world",pins_sub:"Your pin colour represents where you came from — together they map the world inside Lisbon.",pin1:"Europe",pin2:"Asia",pin3:"Africa",pin4:"Americas",pin5:"Oceania",pin6:"Middle East",quote_text:'"It\'s not every day we get to see the invisible threads that connect us. <em>This city is written by everyone who calls it home.</em>"',stories_tag:"Real stories",stories_title:"What Lisbon means to them.",v1_origin:"From Dakar · 3 years in Lisbon",v1_quote:'"Every Tuesday I come here for spices. The smell is almost like Dakar. Almost."',v1_word:"Smell",v2_origin:"From Naples · 1 year in Lisbon",v2_quote:'"I waited for this bus 40 times before understanding the delay was part of the city\'s rhythm."',v2_word:"Rhythm",v3_origin:"From Casablanca · 5 years in Lisbon",v3_quote:'"My daughter learned to walk in this garden. When I come back alone, I still hear her tiny footsteps."',v3_word:"Roots",map_search_ph:"Search a place in Lisbon...",v4_origin:"From Brazil · 2 years in Lisbon",v4_quote:'"I came here on my first day. I looked at the Tagus and knew I was staying."',v4_word:"Arrival",v5_origin:"From Angola · 4 years in Lisbon",v5_quote:'"The fado here is not for tourists. It\'s someone crying with their mouth closed."',v5_word:"Saudade",cta_title:'Do you have a story tied to <span>Lisbon?</span>',cta_desc:'Take a pin. Write a word. Place it on your spot. <strong>No account, no data, no app needed.</strong> Just your voice and a place.',cta_btn1:"I want to join",cta_btn2:"Learn more",footer_sub:"A project of voices and memories · Lisbon, Portugal",foot_about:"About",foot_contact:"Contact"},
+
+it:{nav_how:"Come funziona",nav_stories:"Storie",nav_share:"Condividi la tua",hero_tag:"🗺 Lisbona · Voci Reali",hero_h1:'<span class="hl-pink">La città</span><br>in cui <span class="hl-blue">viviamo</span><br><span class="hl-coral">insieme</span>',hero_desc:'Una città non è solo strade ed edifici. È <em>routine condivise, vite e memorie.</em> Non importa da dove vieni — condividiamo gli stessi angoli.',hero_btn1:"Come funziona",hero_btn2:"Racconta la tua storia",stat1:"Storie condivise",stat2:"Luoghi a Lisbona",stat3:"Parti del mondo",stat4:"Dati personali richiesti",q_title:'Cosa significa <span>Lisbona</span> per te?',q_sub:'Prendi un cartoncino e un pin colorato. Scrivi una parola. Mettilo nel tuo posto preferito a Lisbona. <strong>È così che si scrive una città — da tutti quelli che la chiamano casa.</strong>',q_btn:"Scrivi la tua parola",how_tag:"Come funziona",how_title:"Esplora. Senti. Condividi.",step1_title:"Naviga la mappa",step1_desc:"Esplora la mappa di Lisbona e scopri i luoghi segnati dalla comunità.",step2_title:"Clicca su uno spot",step2_desc:"Leggi gli insight, pensieri ed emozioni che le persone hanno lasciato — cosa significa la città per loro.",step3_title:"Condividi il tuo",step3_desc:"Aggiungi la tua prospettiva. Una parola, un'emozione, un ricordo. Senza account, senza dati.",pins_title:"Ogni colore è un mondo",pins_sub:"Il colore del tuo pin rappresenta da dove vieni — insieme formano la mappa del mondo a Lisbona.",pin1:"Europa",pin2:"Asia",pin3:"Africa",pin4:"Americhe",pin5:"Oceania",pin6:"Medio Oriente",quote_text:'"Non è tutti i giorni che riusciamo a vedere i fili invisibili che ci connettono. <em>Questa città è scritta da tutti quelli che la chiamano casa.</em>"',stories_tag:"Storie vere",stories_title:"Cosa Lisbona significa per loro.",v1_origin:"Da Dakar · 3 anni a Lisbona",v1_quote:'"Ogni martedì vengo qui per le spezie. Il profumo è quasi come a Dakar. Quasi."',v1_word:"Profumo",v2_origin:"Da Napoli · 1 anno a Lisbona",v2_quote:'"Ho aspettato questo bus 40 volte prima di capire che il ritardo era parte del ritmo della città."',v2_word:"Ritmo",v3_origin:"Da Casablanca · 5 anni a Lisbona",v3_quote:'"Mia figlia ha imparato a camminare in questo giardino. Quando torno qui da sola, sento ancora i suoi passi piccoli."',v3_word:"Radici",map_search_ph:"Cerca un posto a Lisbona...",v4_origin:"Dal Brasile · 2 anni a Lisbona",v4_quote:'"Sono venuto qui il primo giorno. Ho guardato il Tejo e ho capito che sarei rimasto."',v4_word:"Arrivo",v5_origin:"Dall\'Angola · 4 anni a Lisbona",v5_quote:'"Il fado qui non è per i turisti. È qualcuno che piange a bocca chiusa."',v5_word:"Saudade",cta_title:'Hai una storia legata a <span>Lisbona?</span>',cta_desc:'Prendi un pin. Scrivi una parola. Mettila nel tuo posto. <strong>Nessun account, nessun dato, nessuna app.</strong> Solo la tua voce e un luogo.',cta_btn1:"Voglio partecipare",cta_btn2:"Scopri di più",footer_sub:"Un progetto di voci e memorie · Lisbona, Portogallo",foot_about:"About",foot_contact:"Contatti"},
+
+fr:{nav_how:"Comment ça marche",nav_stories:"Histoires",nav_share:"Partage la tienne",hero_tag:"🗺 Lisbonne · Vraies Voix",hero_h1:'<span class="hl-pink">La ville</span><br>où nous <span class="hl-blue">vivons</span><br><span class="hl-coral">ensemble</span>',hero_desc:'Une ville n\'est pas que des rues et des bâtiments. Ce sont <em>des routines partagées, des vies et des souvenirs.</em> Peu importe d\'où tu viens — nous partageons les mêmes coins.',hero_btn1:"Comment ça marche",hero_btn2:"Raconte ton histoire",stat1:"Histoires partagées",stat2:"Lieux à Lisbonne",stat3:"Parties du monde",stat4:"Données personnelles demandées",q_title:'Que signifie <span>Lisbonne</span> pour toi?',q_sub:'Prends une carte et une épingle colorée. Écris un mot. Place-la sur ton endroit préféré à Lisbonne. <strong>C\'est ainsi que la ville s\'écrit — par tous ceux qui l\'appellent chez eux.</strong>',q_btn:"Écris ton mot",how_tag:"Comment ça marche",how_title:"Explore. Ressens. Partage.",step1_title:"Navigue la carte",step1_desc:"Parcours la carte de Lisbonne et découvre les lieux marqués par la communauté.",step2_title:"Clique sur un endroit",step2_desc:"Lis les insights, pensées et émotions que les gens ont laissés — ce que la ville signifie pour eux.",step3_title:"Partage le tien",step3_desc:"Ajoute ta propre perspective. Un mot, une émotion, un souvenir. Sans compte, sans données.",pins_title:"Chaque couleur est un monde",pins_sub:"La couleur de ton épingle représente d\'où tu viens — ensemble elles cartographient le monde à Lisbonne.",pin1:"Europe",pin2:"Asie",pin3:"Afrique",pin4:"Amériques",pin5:"Océanie",pin6:"Moyen-Orient",quote_text:'"Ce n\'est pas tous les jours qu\'on voit les fils invisibles qui nous relient. <em>Cette ville est écrite par tous ceux qui l\'appellent chez eux.</em>"',stories_tag:"Vraies histoires",stories_title:"Ce que Lisbonne signifie pour eux.",v1_origin:"De Dakar · 3 ans à Lisbonne",v1_quote:'"Chaque mardi je viens ici pour les épices. L\'odeur est presque comme à Dakar. Presque."',v1_word:"Odeur",v2_origin:"De Naples · 1 an à Lisbonne",v2_quote:'"J\'ai attendu ce bus 40 fois avant de comprendre que le retard faisait partie du rythme de la ville."',v2_word:"Rythme",v3_origin:"De Casablanca · 5 ans à Lisbonne",v3_quote:'"Ma fille a appris à marcher dans ce jardin. Quand j\'y reviens seule, j\'entends encore ses petits pas."',v3_word:"Racines",map_search_ph:"Cherche un endroit à Lisbonne...",v4_origin:"Du Brésil · 2 ans à Lisbonne",v4_quote:'"Je suis venu ici mon premier jour. J\'ai regardé le Tage et j\'ai su que je restais."',v4_word:"Arrivée",v5_origin:"D\'Angola · 4 ans à Lisbonne",v5_quote:'"Le fado ici n\'est pas pour les touristes. C\'est quelqu\'un qui pleure la bouche fermée."',v5_word:"Saudade",cta_title:'Tu as une histoire liée à <span>Lisbonne?</span>',cta_desc:'Prends une épingle. Écris un mot. Place-la sur ton endroit. <strong>Pas de compte, pas de données, pas d\'appli.</strong> Juste ta voix et un endroit.',cta_btn1:"Je veux participer",cta_btn2:"En savoir plus",footer_sub:"Un projet de voix et mémoires · Lisbonne, Portugal",foot_about:"À propos",foot_contact:"Contact"},
+
+es:{nav_how:"Cómo funciona",nav_stories:"Historias",nav_share:"Comparte la tuya",hero_tag:"🗺 Lisboa · Voces Reales",hero_h1:'<span class="hl-pink">La ciudad</span><br>en que <span class="hl-blue">vivimos</span><br><span class="hl-coral">juntos</span>',hero_desc:'Una ciudad no es solo calles y edificios. Son <em>rutinas compartidas, vidas y recuerdos.</em> Sin importar de dónde vengas — compartimos los mismos rincones.',hero_btn1:"Cómo funciona",hero_btn2:"Cuenta tu historia",stat1:"Historias compartidas",stat2:"Lugares en Lisboa",stat3:"Partes del mundo",stat4:"Datos personales pedidos",q_title:'¿Qué significa <span>Lisboa</span> para ti?',q_sub:'Toma una tarjeta y un pin de color. Escribe una palabra. Colócala en tu lugar favorito de Lisboa. <strong>Así se escribe una ciudad — por todos los que la llaman hogar.</strong>',q_btn:"Escribe tu palabra",how_tag:"Cómo funciona",how_title:"Explora. Siente. Comparte.",step1_title:"Navega el mapa",step1_desc:"Recorre el mapa de Lisboa y descubre los lugares marcados por la comunidad.",step2_title:"Haz clic en un lugar",step2_desc:"Lee los insights, pensamientos y emociones que las personas dejaron — lo que la ciudad significa para ellas.",step3_title:"Comparte el tuyo",step3_desc:"Añade tu propia perspectiva. Una palabra, una emoción, un recuerdo. Sin cuenta, sin datos.",pins_title:"Cada color es un mundo",pins_sub:"El color de tu pin representa de dónde vienes — juntos forman el mapa del mundo en Lisboa.",pin1:"Europa",pin2:"Asia",pin3:"África",pin4:"Américas",pin5:"Oceanía",pin6:"Oriente Medio",quote_text:'"No es todos los días que conseguimos ver los hilos invisibles que nos conectan. <em>Esta ciudad está escrita por todos los que la llaman hogar.</em>"',stories_tag:"Historias reales",stories_title:"Lo que Lisboa significa para ellos.",v1_origin:"De Dakar · 3 años en Lisboa",v1_quote:'"Cada martes vengo aquí por las especias. El olor es casi como en Dakar. Casi."',v1_word:"Olor",v2_origin:"De Nápoles · 1 año en Lisboa",v2_quote:'"Esperé este autobús 40 veces antes de entender que el retraso era parte del ritmo de la ciudad."',v2_word:"Ritmo",v3_origin:"De Casablanca · 5 años en Lisboa",v3_quote:'"Mi hija aprendió a caminar en este jardín. Cuando vuelvo aquí sola, todavía escucho sus pasitos."',v3_word:"Raíces",map_search_ph:"Busca un lugar en Lisboa...",v4_origin:"De Brasil · 2 años en Lisboa",v4_quote:'"Vine aquí el primer día. Miré el Tajo y supe que me quedaba."',v4_word:"Llegada",v5_origin:"De Angola · 4 años en Lisboa",v5_quote:'"El fado de aquí no es para turistas. Es alguien llorando con la boca cerrada."',v5_word:"Saudade",cta_title:'¿Tienes una historia ligada a <span>Lisboa?</span>',cta_desc:'Toma un pin. Escribe una palabra. Colócala en tu lugar. <strong>Sin cuenta, sin datos, sin app.</strong> Solo tu voz y un lugar.',cta_btn1:"Quiero participar",cta_btn2:"Saber más",footer_sub:"Un proyecto de voces y memorias · Lisboa, Portugal",foot_about:"Sobre",foot_contact:"Contacto"},
+
+de:{nav_how:"Wie es funktioniert",nav_stories:"Geschichten",nav_share:"Teile deine",hero_tag:"🗺 Lissabon · Echte Stimmen",hero_h1:'<span class="hl-pink">Die Stadt</span><br>in der wir <span class="hl-blue">leben</span><br><span class="hl-coral">zusammen</span>',hero_desc:'Eine Stadt ist nicht nur Straßen und Gebäude. Es sind <em>geteilte Routinen, Leben und Erinnerungen.</em> Egal woher du kommst — wir teilen dieselben Ecken.',hero_btn1:"Wie es funktioniert",hero_btn2:"Deine Geschichte teilen",stat1:"Geteilte Geschichten",stat2:"Orte in Lissabon",stat3:"Teile der Welt",stat4:"Persönliche Daten verlangt",q_title:'Was bedeutet <span>Lissabon</span> für dich?',q_sub:'Nimm eine Karte und eine farbige Nadel. Schreib ein Wort. Platziere sie an deinem Lieblingsort in Lissabon. <strong>So wird eine Stadt geschrieben — von allen, die sie Heimat nennen.</strong>',q_btn:"Schreib dein Wort",how_tag:"Wie es funktioniert",how_title:"Erkunde. Fühl. Teile.",step1_title:"Navigiere die Karte",step1_desc:"Erkunde die Lissabonner Karte und entdecke die von der Community markierten Orte.",step2_title:"Klicke auf einen Ort",step2_desc:"Lies die Einblicke, Gedanken und Emotionen, die Menschen hinterlassen haben — was die Stadt für sie bedeutet.",step3_title:"Teile deinen",step3_desc:"Füge deine eigene Perspektive hinzu. Ein Wort, eine Emotion, eine Erinnerung. Kein Konto, keine Daten.",pins_title:"Jede Farbe ist eine Welt",pins_sub:"Deine Nadelfarbe zeigt, woher du kommst — zusammen bilden sie die Weltkarte in Lissabon.",pin1:"Europa",pin2:"Asien",pin3:"Afrika",pin4:"Amerika",pin5:"Ozeanien",pin6:"Naher Osten",quote_text:'"Es ist nicht jeden Tag, dass wir die unsichtbaren Fäden sehen, die uns verbinden. <em>Diese Stadt wird von allen geschrieben, die sie Heimat nennen.</em>"',stories_tag:"Echte Geschichten",stories_title:"Was Lissabon für sie bedeutet.",v1_origin:"Aus Dakar · 3 Jahre in Lissabon",v1_quote:'"Jeden Dienstag komme ich für Gewürze. Der Geruch ist fast wie in Dakar. Fast."',v1_word:"Geruch",v2_origin:"Aus Neapel · 1 Jahr in Lissabon",v2_quote:'"Ich habe 40 Mal auf diesen Bus gewartet, bevor ich verstand, dass die Verspätung Teil des Stadtrhythmus ist."',v2_word:"Rhythmus",v3_origin:"Aus Casablanca · 5 Jahre in Lissabon",v3_quote:'"Meine Tochter hat in diesem Garten laufen gelernt. Wenn ich allein zurückkomme, höre ich noch ihre kleinen Schritte."',v3_word:"Wurzeln",map_search_ph:"Suche einen Ort in Lissabon...",v4_origin:"Aus Brasilien · 2 Jahre in Lissabon",v4_quote:'"Ich kam hier an meinem ersten Tag. Ich schaute auf den Tejo und wusste: ich bleibe."',v4_word:"Ankunft",v5_origin:"Aus Angola · 4 Jahre in Lissabon",v5_quote:'"Der Fado hier ist nicht für Touristen. Es ist jemand, der mit geschlossenem Mund weint."',v5_word:"Saudade",cta_title:'Hast du eine Geschichte die mit <span>Lissabon</span> verbunden ist?',cta_desc:'Nimm eine Nadel. Schreib ein Wort. Platziere es an deinem Ort. <strong>Kein Konto, keine Daten, keine App.</strong> Nur deine Stimme und ein Ort.',cta_btn1:"Ich will mitmachen",cta_btn2:"Mehr erfahren",footer_sub:"Ein Projekt aus Stimmen und Erinnerungen · Lissabon, Portugal",foot_about:"Über uns",foot_contact:"Kontakt"}
+};
+
+let lang = 'pt';
+
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lp').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.lp[onclick="setLang('${l}')"]`).classList.add('active');
+  document.documentElement.lang = l;
+  const t = T[l];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (t[k] !== undefined) el.innerHTML = t[k];
+  });
+  document.getElementById('map-search').placeholder = t.map_search_ph || '';
+  markers.forEach(m => m.bindPopup(buildPopup(m._spotData, t), { maxWidth: 250 }));
+}
+
+setLang('pt');
+</script>
+</body>
+</html>
