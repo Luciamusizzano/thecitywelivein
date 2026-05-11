@@ -903,8 +903,8 @@ const spots = [
   { lat: 38.7168, lng: -9.1258, place: "Graça",                               avatar: "🚋", nick: "tram_28",           origin: "From Braga · 6 years in Lisbon", quote: '"Skip the tram, walk up. The climb is the point and by the time you arrive you\'ve already seen half the city."', word: "", color: "#FF6B6B" },
   { lat: 38.7181, lng: -9.1276, place: "Feira da Ladra · Graça",              avatar: "☕", nick: "graca_sunday",      origin: "", quote: '"Sunday market, bad coffee, great people. Nobody is in a hurry here. I didn\'t know I needed that until I found it."', word: "Unhurried", color: "#C4B5FD" },
   { lat: 38.7184, lng: -9.1280, place: "Feira da Ladra · Graça",              avatar: "📦", nick: "coffee.and.vintage", origin: "From Setúbal · 3 years in Lisbon", quote: '"I love walking to the Lisbon flea market, having a coffee with my friends and spend the morning looking for vintage finds."', word: "", color: "#2DD4BF" },
-  { lat: 38.7063, lng: -9.1440, place: "Jardim do Rio",                       avatar: "🌊", nick: "tagus_runner",      origin: "From Lisbon · always here", quote: '"Come at 7am before the city wakes up. Just you, the river, and the bridge in the fog. Bring coffee."', word: "", color: "#38BFFF" },
-  { lat: 38.7067, lng: -9.1435, place: "Jardim do Rio",                       avatar: "👧", nick: "jardim_rio_kid",    origin: "", quote: '"My daughter calls this \'the river park\'. She runs straight to the water every time. I think she loves Lisbon more than I do."', word: "Hers", color: "#F472B6" }
+  { lat: 38.6848, lng: -9.1518, place: "Jardim do Rio · Almada",              avatar: "🌊", nick: "tagus_runner",      origin: "From Lisbon · always here", quote: '"Come at 7am before the city wakes up. Just you, the river, and the bridge in the fog. Bring coffee."', word: "", color: "#38BFFF" },
+  { lat: 38.6852, lng: -9.1523, place: "Jardim do Rio · Almada",              avatar: "👧", nick: "jardim_rio_kid",    origin: "", quote: '"My daughter calls this \'the river park\'. She runs straight to the water every time. I think she loves Lisbon more than I do."', word: "Hers", color: "#F472B6" }
 ];
 
 function makePin(color, avatar) {
@@ -932,6 +932,8 @@ function buildPopup(spot, t) {
     ${word ? `<span style="background:${spot.color};color:#1E1B18;padding:2px 10px;border-radius:100px;font-size:11px;font-weight:800;border:2px solid #1E1B18;display:inline-block;">${word}</span>` : ''}
   </div>`;
 }
+
+let pendingLat = null, pendingLng = null, pendingPlace = '';
 
 const markers = spots.map(spot => {
   const m = L.marker([spot.lat, spot.lng], { icon: makePin(spot.color, spot.avatar) }).addTo(lisbonMap);
@@ -992,8 +994,6 @@ function setLang(l) {
   }
 }
 
-setLang('pt');
-
 // ── MODAL TRANSLATIONS ───────────────────────────────────────
 const MODAL_T = {
   pt: {
@@ -1046,13 +1046,14 @@ const MODAL_T = {
   }
 };
 
+setLang('pt');
+
 // ── SUPABASE ─────────────────────────────────────────────────
 const SUPA_URL = 'https://lcnlrkyplqqbmqgoroij.supabase.co';
 const SUPA_KEY = 'sb_publishable_B52IREdszV2Khe1wZohupQ_x5lq0k2t';
 const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
 const addedPinIds = new Set();
-let pendingLat = null, pendingLng = null, pendingPlace = '';
 
 function openAddModal(lat, lng, place) {
   pendingLat = lat; pendingLng = lng; pendingPlace = place;
