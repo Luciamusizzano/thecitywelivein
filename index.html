@@ -1157,9 +1157,9 @@ function closeModal() {
 }
 
 function buildUserPopup(pin) {
-  const place = pin['what\'s your favourite place in lisbon?'] || '';
-  const origin = pin['where do you come from?'] || '';
-  const meaning = pin['what does lisbon mean to you?'] || '';
+  const place = pin.whats_your_favourite_place || '';
+  const origin = pin.where_do_you_come_from || '';
+  const meaning = pin.what_does_lisbon_mean_to_you || '';
   return `<div style="font-family:'Nunito',sans-serif;min-width:200px;">
     <div style="font-weight:800;font-size:13px;color:#1E1B18;margin-bottom:4px;">${pin.nickname || 'Anonymous'}</div>
     <div style="font-size:11px;color:#7A6E68;font-weight:600;margin-bottom:6px;">📍 ${place} · ${origin}</div>
@@ -1191,9 +1191,9 @@ async function submitPin() {
     nickname,
     lat: pendingLat,
     lng: pendingLng,
-    'where do you come from?': origin,
-    'what\'s your favourite place in lisbon?': place,
-    'what does lisbon mean to you?': document.getElementById('pin-meaning').value.trim() || null
+    where_do_you_come_from: origin,
+    whats_your_favourite_place: place,
+    what_does_lisbon_mean_to_you: document.getElementById('pin-meaning').value.trim() || null
   }).select();
   if (error) {
     btn.disabled = false;
