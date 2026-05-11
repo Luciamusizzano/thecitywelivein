@@ -864,24 +864,17 @@ footer p { font-size: .82rem; color: #7A6E68; font-weight: 600; }
 <div id="add-pin-modal" class="modal-overlay">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal()">×</button>
-    <div class="modal-title">A tua voz em Lisboa</div>
+    <div class="modal-title" data-i18n="modal_title"></div>
     <div class="modal-place" id="modal-place">📍 ...</div>
-    <label class="modal-label">Palavra *</label>
-    <input class="modal-input" id="pin-word" type="text" placeholder="ex: Saudade, Casa, Ritmo..." maxlength="40" />
-    <label class="modal-label">De onde vens? *</label>
-    <input class="modal-input" id="pin-origin" type="text" placeholder="ex: Itália, Brasil, Portugal..." maxlength="60" />
-    <label class="modal-label">Continente *</label>
-    <select class="modal-select" id="pin-continent">
-      <option value="Europa">Europa</option>
-      <option value="Ásia">Ásia</option>
-      <option value="África">África</option>
-      <option value="América">América</option>
-      <option value="Oceânia">Oceânia</option>
-      <option value="Médio Oriente">Médio Oriente</option>
-    </select>
-    <label class="modal-label">Frase (opcional)</label>
-    <textarea class="modal-textarea" id="pin-quote" placeholder="Uma memória, uma sensação, um momento..."></textarea>
-    <button class="modal-submit" id="modal-submit-btn" onclick="submitPin()">Adicionar ao mapa ✨</button>
+    <label class="modal-label" data-i18n="modal_nick"></label>
+    <input class="modal-input" id="pin-nickname" type="text" maxlength="40" />
+    <label class="modal-label" data-i18n="modal_origin_lbl"></label>
+    <input class="modal-input" id="pin-origin" type="text" maxlength="80" />
+    <label class="modal-label" data-i18n="modal_place_lbl"></label>
+    <input class="modal-input" id="pin-place" type="text" maxlength="100" />
+    <label class="modal-label" data-i18n="modal_meaning_lbl"></label>
+    <textarea class="modal-textarea" id="pin-meaning"></textarea>
+    <button class="modal-submit" id="modal-submit-btn" data-i18n="modal_submit" onclick="submitPin()"></button>
   </div>
 </div>
 
@@ -903,7 +896,15 @@ const spots = [
   { lat: 38.7218, lng: -9.1333, place: "Paragem Intendente",       avatar: "🎸", nick: "metro_ghost",    originKey: "v2_origin", quoteKey: "v2_quote", wordKey: "v2_word", color: "#38BFFF" },
   { lat: 38.7143, lng: -9.1572, place: "Jardim da Estrela",        avatar: "🌙", nick: "jardim_estrela", originKey: "v3_origin", quoteKey: "v3_quote", wordKey: "v3_word", color: "#C4B5FD" },
   { lat: 38.7139, lng: -9.1311, place: "Miradouro de Santa Luzia", avatar: "☀️", nick: "alfama.sun",     originKey: "v4_origin", quoteKey: "v4_quote", wordKey: "v4_word", color: "#4ADE80" },
-  { lat: 38.7080, lng: -9.1455, place: "Bairro Alto",              avatar: "🎵", nick: "fado.noite",     originKey: "v5_origin", quoteKey: "v5_quote", wordKey: "v5_word", color: "#FFD700" }
+  { lat: 38.7080, lng: -9.1455, place: "Bairro Alto",              avatar: "🎵", nick: "fado.noite",     originKey: "v5_origin", quoteKey: "v5_quote", wordKey: "v5_word", color: "#FFD700" },
+  { lat: 38.7147, lng: -9.1451, place: "Miradouro de São Pedro de Alcântara", avatar: "🚶", nick: "lisbon_wanderer",   origin: "", quote: '"I found this place by accident, running late for something I\'ve now completely forgotten. Sat down for five minutes. Stayed for two hours."', word: "", color: "#38BFFF" },
+  { lat: 38.7268, lng: -9.1540, place: "Parque Eduardo VII",                  avatar: "🌿", nick: "lisbon_lunch",      origin: "From Lisbon · born here", quote: '"Every Friday I eat my lunch here alone. It\'s the one moment of the week that\'s completely mine."', word: "", color: "#4ADE80" },
+  { lat: 38.7173, lng: -9.1264, place: "Graça",                               avatar: "🌅", nick: "graca_mornings",    origin: "", quote: '"My neighbour told me to go there for the first time on my first week. I\'ve lived here three years now. I never left."', word: "", color: "#FFD700" },
+  { lat: 38.7168, lng: -9.1258, place: "Graça",                               avatar: "🚋", nick: "tram_28",           origin: "From Braga · 6 years in Lisbon", quote: '"Skip the tram, walk up. The climb is the point and by the time you arrive you\'ve already seen half the city."', word: "", color: "#FF6B6B" },
+  { lat: 38.7181, lng: -9.1276, place: "Feira da Ladra · Graça",              avatar: "☕", nick: "graca_sunday",      origin: "", quote: '"Sunday market, bad coffee, great people. Nobody is in a hurry here. I didn\'t know I needed that until I found it."', word: "Unhurried", color: "#C4B5FD" },
+  { lat: 38.7184, lng: -9.1280, place: "Feira da Ladra · Graça",              avatar: "📦", nick: "coffee.and.vintage", origin: "From Setúbal · 3 years in Lisbon", quote: '"I love walking to the Lisbon flea market, having a coffee with my friends and spend the morning looking for vintage finds."', word: "", color: "#2DD4BF" },
+  { lat: 38.7063, lng: -9.1440, place: "Jardim do Rio",                       avatar: "🌊", nick: "tagus_runner",      origin: "From Lisbon · always here", quote: '"Come at 7am before the city wakes up. Just you, the river, and the bridge in the fog. Bring coffee."', word: "", color: "#38BFFF" },
+  { lat: 38.7067, lng: -9.1435, place: "Jardim do Rio",                       avatar: "👧", nick: "jardim_rio_kid",    origin: "", quote: '"My daughter calls this \'the river park\'. She runs straight to the water every time. I think she loves Lisbon more than I do."', word: "Hers", color: "#F472B6" }
 ];
 
 function makePin(color, avatar) {
@@ -915,17 +916,20 @@ function makePin(color, avatar) {
 }
 
 function buildPopup(spot, t) {
+  const origin = spot.origin !== undefined ? spot.origin : (t[spot.originKey] || '');
+  const quote  = spot.quote  !== undefined ? spot.quote  : (t[spot.quoteKey]  || '');
+  const word   = spot.word   !== undefined ? spot.word   : (t[spot.wordKey]   || '');
   return `<div style="font-family:'Nunito',sans-serif;min-width:210px;">
     <div style="font-size:11px;font-weight:800;color:#1E1B18;margin-bottom:7px;letter-spacing:.03em;">📍 ${spot.place}</div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
       <div style="width:34px;height:34px;border-radius:50%;border:2px solid #1E1B18;display:flex;align-items:center;justify-content:center;font-size:1.1rem;background:#FFF8F0;flex-shrink:0;">${spot.avatar}</div>
       <div>
         <div style="font-weight:800;font-size:13px;color:#1E1B18;">${spot.nick}</div>
-        <div style="font-size:11px;color:#7A6E68;font-weight:600;">${t[spot.originKey] || ''}</div>
+        ${origin ? `<div style="font-size:11px;color:#7A6E68;font-weight:600;">${origin}</div>` : ''}
       </div>
     </div>
-    <p style="font-style:italic;font-size:12px;line-height:1.6;color:#1E1B18;margin:0 0 8px;">${t[spot.quoteKey] || ''}</p>
-    <span style="background:${spot.color};color:#1E1B18;padding:2px 10px;border-radius:100px;font-size:11px;font-weight:800;border:2px solid #1E1B18;display:inline-block;">${t[spot.wordKey] || ''}</span>
+    <p style="font-style:italic;font-size:12px;line-height:1.6;color:#1E1B18;margin:0 0 8px;">${quote}</p>
+    ${word ? `<span style="background:${spot.color};color:#1E1B18;padding:2px 10px;border-radius:100px;font-size:11px;font-weight:800;border:2px solid #1E1B18;display:inline-block;">${word}</span>` : ''}
   </div>`;
 }
 
@@ -979,19 +983,73 @@ function setLang(l) {
   });
   document.getElementById('map-search').placeholder = t.map_search_ph || '';
   markers.forEach(m => m.bindPopup(buildPopup(m._spotData, t), { maxWidth: 250 }));
+  const mt = MODAL_T[l];
+  if (mt) {
+    document.getElementById('pin-nickname').placeholder = mt.ph_nick;
+    document.getElementById('pin-origin').placeholder = mt.ph_origin;
+    document.getElementById('pin-place').placeholder = mt.ph_place;
+    document.getElementById('pin-meaning').placeholder = mt.ph_meaning;
+  }
 }
 
 setLang('pt');
+
+// ── MODAL TRANSLATIONS ───────────────────────────────────────
+const MODAL_T = {
+  pt: {
+    title:"A tua voz em Lisboa", nick:"Nickname *", origin_lbl:"De onde vens? *",
+    place_lbl:"Qual é o teu lugar favorito em Lisboa? *", meaning_lbl:"O que significa Lisboa para ti?",
+    submit:"Adicionar ao mapa ✨", ph_nick:"ex: alfama.sun, metro_ghost...",
+    ph_origin:"ex: Itália, Brasil, Portugal...", ph_place:"ex: Jardim da Estrela...",
+    ph_meaning:"Uma palavra, uma memória, uma sensação...",
+    alert:"Nickname, origem e lugar favorito são obrigatórios!", error:"Erro ao guardar. Tenta de novo."
+  },
+  en: {
+    title:"Your voice in Lisbon", nick:"Nickname *", origin_lbl:"Where do you come from? *",
+    place_lbl:"What's your favourite place in Lisbon? *", meaning_lbl:"What does Lisbon mean to you?",
+    submit:"Add to the map ✨", ph_nick:"e.g. alfama.sun, metro_ghost...",
+    ph_origin:"e.g. Italy, Brazil, Portugal...", ph_place:"e.g. Jardim da Estrela...",
+    ph_meaning:"A word, a memory, a feeling...",
+    alert:"Nickname, origin and favourite place are required!", error:"Error saving. Please try again."
+  },
+  it: {
+    title:"La tua voce a Lisbona", nick:"Nickname *", origin_lbl:"Da dove vieni? *",
+    place_lbl:"Qual è il tuo posto preferito a Lisbona? *", meaning_lbl:"Cosa significa Lisbona per te?",
+    submit:"Aggiungi alla mappa ✨", ph_nick:"es: alfama.sun, metro_ghost...",
+    ph_origin:"es: Italia, Brasile, Portogallo...", ph_place:"es: Jardim da Estrela...",
+    ph_meaning:"Una parola, un ricordo, una sensazione...",
+    alert:"Nickname, origine e posto preferito sono obbligatori!", error:"Errore nel salvataggio. Riprova."
+  },
+  fr: {
+    title:"Ta voix à Lisbonne", nick:"Pseudo *", origin_lbl:"D'où viens-tu ? *",
+    place_lbl:"Quel est ton endroit préféré à Lisbonne ? *", meaning_lbl:"Que signifie Lisbonne pour toi ?",
+    submit:"Ajouter à la carte ✨", ph_nick:"ex: alfama.sun, metro_ghost...",
+    ph_origin:"ex: Italie, Brésil, Portugal...", ph_place:"ex: Jardim da Estrela...",
+    ph_meaning:"Un mot, un souvenir, une sensation...",
+    alert:"Pseudo, origine et endroit préféré sont obligatoires !", error:"Erreur lors de la sauvegarde. Réessaie."
+  },
+  es: {
+    title:"Tu voz en Lisboa", nick:"Apodo *", origin_lbl:"¿De dónde eres? *",
+    place_lbl:"¿Cuál es tu lugar favorito en Lisboa? *", meaning_lbl:"¿Qué significa Lisboa para ti?",
+    submit:"Añadir al mapa ✨", ph_nick:"ej: alfama.sun, metro_ghost...",
+    ph_origin:"ej: Italia, Brasil, Portugal...", ph_place:"ej: Jardim da Estrela...",
+    ph_meaning:"Una palabra, un recuerdo, una sensación...",
+    alert:"¡Apodo, origen y lugar favorito son obligatorios!", error:"Error al guardar. Inténtalo de nuevo."
+  },
+  de: {
+    title:"Deine Stimme in Lissabon", nick:"Nickname *", origin_lbl:"Woher kommst du? *",
+    place_lbl:"Was ist dein Lieblingsort in Lissabon? *", meaning_lbl:"Was bedeutet Lissabon für dich?",
+    submit:"Zur Karte hinzufügen ✨", ph_nick:"z.B. alfama.sun, metro_ghost...",
+    ph_origin:"z.B. Italien, Brasilien, Portugal...", ph_place:"z.B. Jardim da Estrela...",
+    ph_meaning:"Ein Wort, eine Erinnerung, ein Gefühl...",
+    alert:"Nickname, Herkunft und Lieblingsort sind erforderlich!", error:"Fehler beim Speichern. Bitte erneut versuchen."
+  }
+};
 
 // ── SUPABASE ─────────────────────────────────────────────────
 const SUPA_URL = 'https://lcnlrkyplqqbmqgoroij.supabase.co';
 const SUPA_KEY = 'sb_publishable_B52IREdszV2Khe1wZohupQ_x5lq0k2t';
 const db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-
-const CONTINENT_COLORS = {
-  'Europa':'#FF6B6B','Ásia':'#38BFFF','África':'#4ADE80',
-  'América':'#FFD700','Oceânia':'#C4B5FD','Médio Oriente':'#2DD4BF'
-};
 
 const addedPinIds = new Set();
 let pendingLat = null, pendingLng = null, pendingPlace = '';
@@ -999,12 +1057,13 @@ let pendingLat = null, pendingLng = null, pendingPlace = '';
 function openAddModal(lat, lng, place) {
   pendingLat = lat; pendingLng = lng; pendingPlace = place;
   document.getElementById('modal-place').textContent = '📍 ' + place;
-  document.getElementById('pin-word').value = '';
+  document.getElementById('pin-nickname').value = '';
   document.getElementById('pin-origin').value = '';
-  document.getElementById('pin-quote').value = '';
+  document.getElementById('pin-place').value = place;
+  document.getElementById('pin-meaning').value = '';
   const btn = document.getElementById('modal-submit-btn');
   btn.disabled = false;
-  btn.textContent = 'Adicionar ao mapa ✨';
+  btn.textContent = MODAL_T[lang]?.submit || 'Add to the map ✨';
   document.getElementById('add-pin-modal').classList.add('open');
 }
 
@@ -1013,20 +1072,20 @@ function closeModal() {
 }
 
 function buildUserPopup(pin) {
-  const color = CONTINENT_COLORS[pin.continent] || '#FFD700';
+  const place = pin['what\'s your favourite place in lisbon?'] || '';
+  const origin = pin['where do you come from?'] || '';
+  const meaning = pin['what does lisbon mean to you?'] || '';
   return `<div style="font-family:'Nunito',sans-serif;min-width:200px;">
-    <div style="font-size:11px;font-weight:800;color:#1E1B18;margin-bottom:7px;">📍 ${pin.place_name || 'Lisboa'}</div>
-    <div style="font-size:12px;color:#7A6E68;font-weight:600;margin-bottom:6px;">${pin.origin}</div>
-    ${pin.quote ? `<p style="font-style:italic;font-size:12px;line-height:1.6;color:#1E1B18;margin:0 0 8px;">"${pin.quote}"</p>` : ''}
-    <span style="background:${color};color:#1E1B18;padding:2px 10px;border-radius:100px;font-size:11px;font-weight:800;border:2px solid #1E1B18;display:inline-block;">${pin.word}</span>
+    <div style="font-weight:800;font-size:13px;color:#1E1B18;margin-bottom:4px;">${pin.nickname || 'Anonymous'}</div>
+    <div style="font-size:11px;color:#7A6E68;font-weight:600;margin-bottom:6px;">📍 ${place} · ${origin}</div>
+    ${meaning ? `<p style="font-style:italic;font-size:12px;line-height:1.6;color:#1E1B18;margin:0;">"${meaning}"</p>` : ''}
   </div>`;
 }
 
 function addUserPinToMap(pin) {
   if (pin.id && addedPinIds.has(pin.id)) return;
   if (pin.id) addedPinIds.add(pin.id);
-  const color = CONTINENT_COLORS[pin.continent] || '#FFD700';
-  const m = L.marker([pin.lat, pin.lng], { icon: makePin(color, '✨') }).addTo(lisbonMap);
+  const m = L.marker([pin.lat, pin.lng], { icon: makePin('#F472B6', '✨') }).addTo(lisbonMap);
   m.bindPopup(buildUserPopup(pin), { maxWidth: 250 });
 }
 
@@ -1036,23 +1095,25 @@ async function loadUserPins() {
 }
 
 async function submitPin() {
-  const word = document.getElementById('pin-word').value.trim();
+  const nickname = document.getElementById('pin-nickname').value.trim();
   const origin = document.getElementById('pin-origin').value.trim();
-  if (!word || !origin) { alert('Palavra e origem são obrigatórios!'); return; }
+  const place = document.getElementById('pin-place').value.trim();
+  if (!nickname || !origin || !place) { alert(MODAL_T[lang]?.alert || 'Nickname, origin and favourite place are required!'); return; }
   const btn = document.getElementById('modal-submit-btn');
   btn.disabled = true;
   btn.textContent = '...';
   const { data: inserted, error } = await db.from('pins').insert({
-    lat: pendingLat, lng: pendingLng,
-    place_name: pendingPlace,
-    word, origin,
-    continent: document.getElementById('pin-continent').value,
-    quote: document.getElementById('pin-quote').value.trim() || null
+    nickname,
+    lat: pendingLat,
+    lng: pendingLng,
+    'where do you come from?': origin,
+    'what\'s your favourite place in lisbon?': place,
+    'what does lisbon mean to you?': document.getElementById('pin-meaning').value.trim() || null
   }).select();
   if (error) {
     btn.disabled = false;
-    btn.textContent = 'Adicionar ao mapa ✨';
-    alert('Erro ao guardar. Tenta de novo.');
+    btn.textContent = MODAL_T[lang]?.submit || 'Add to the map ✨';
+    alert(MODAL_T[lang]?.error || 'Error saving. Please try again.');
     return;
   }
   if (inserted && inserted[0]) addUserPinToMap(inserted[0]);
