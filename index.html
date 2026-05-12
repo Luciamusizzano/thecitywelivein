@@ -1168,8 +1168,9 @@ function buildUserPopup(pin) {
 }
 
 function addUserPinToMap(pin) {
-  if (pin.id && addedPinIds.has(pin.id)) return;
-  if (pin.id) addedPinIds.add(pin.id);
+  const key = pin.nickname;
+  if (!key || addedPinIds.has(key)) return;
+  addedPinIds.add(key);
   const m = L.marker([pin.lat, pin.lng], { icon: makePin('#F472B6', '✨') }).addTo(lisbonMap);
   m.bindPopup(buildUserPopup(pin), { maxWidth: 250 });
   addUserStoryCard(pin);
