@@ -1172,6 +1172,29 @@ function addUserPinToMap(pin) {
   if (pin.id) addedPinIds.add(pin.id);
   const m = L.marker([pin.lat, pin.lng], { icon: makePin('#F472B6', '✨') }).addTo(lisbonMap);
   m.bindPopup(buildUserPopup(pin), { maxWidth: 250 });
+  addUserStoryCard(pin);
+}
+
+function addUserStoryCard(pin) {
+  const grid = document.querySelector('.stories-grid');
+  if (!grid) return;
+  const place = pin.whats_your_favourite_place || '';
+  const origin = pin.where_do_you_come_from || '';
+  const meaning = pin.what_does_lisbon_mean_to_you || '';
+  const card = document.createElement('div');
+  card.className = 'story-card';
+  card.innerHTML = `
+    <div class="story-top">
+      <div class="story-avatar" style="background:#FAD5F0">✨</div>
+      <div>
+        <div class="story-nick">${pin.nickname || 'Anonymous'}</div>
+        ${origin ? `<div class="story-from">${origin}</div>` : ''}
+      </div>
+    </div>
+    <div class="story-place">📍 ${place}</div>
+    ${meaning ? `<p class="story-quote">"${meaning}"</p>` : ''}
+  `;
+  grid.appendChild(card);
 }
 
 async function loadUserPins() {
